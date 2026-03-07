@@ -1,11 +1,24 @@
+//loading express library
 const express = require("express");
+//postgreSQL connetion pool
+const pool = require("./db");
+//loading cors library to allow react frontend to call backend
+const cors = require("cors");
 
-const app = express();
+const app = express();//create express app
+app.use(cors());//enable cors for all routes
+app.use(express.json());//middleware to purse JSON bodies
 
-app.get("/", (req, res) => {
-  res.send("Honeypot Backend Running");
+//get all attacks logs
+app.get("/attacks", async (req, res) => {
+  try {
+    const attacks = await pool.query("SELECT * FROM attack_logs ORDER BY timestamp DESC");
+    res.json(attacks.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
