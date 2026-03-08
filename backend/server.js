@@ -4,10 +4,13 @@ const express = require("express");
 const pool = require("./db");
 //loading cors library to allow react frontend to call backend
 const cors = require("cors");
+//loading auth routes
+const authRoutes = require("./routes/auth");
 
 const app = express();//create express app
 app.use(cors());//enable cors for all routes
 app.use(express.json());//middleware to purse JSON bodies
+app.use("/auth", authRoutes);//use auth routes for auth endpoints
 
 //get all attacks logs
 app.get("/attacks", async (req, res) => {
