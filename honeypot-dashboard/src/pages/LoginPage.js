@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaHome } from "react-icons/fa";   // Home icon
 import Navbar from "../components/Navbar";
 
 function LoginPage() {
@@ -12,9 +13,8 @@ function LoginPage() {
 
   const validateForm = () => {
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;// simple email validation
-
-    const passwordRegex = /^(?=.*[!@#$%^&*]).{8,}$/;// at least 8 characters and one special character
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[!@#$%^&*]).{8,}$/;
 
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address";
@@ -54,10 +54,10 @@ function LoginPage() {
         localStorage.setItem("token", data.token);
         navigate("/dashboard");
       } else {
-        setError(data.message || "Login failed");
+        setError("Invalid credentials");
       }
 
-    } catch (err) {
+    } catch {
       setError("Server error");
     }
   };
@@ -81,9 +81,23 @@ function LoginPage() {
             background: "#1e1e1e",
             padding: "40px",
             borderRadius: "10px",
-            width: "350px"
+            width: "350px",
+            position: "relative"
           }}
         >
+
+          {/* Home Icon */}
+          <FaHome
+            onClick={() => navigate("/")}
+            style={{
+              position: "absolute",
+              top: "15px",
+              left: "15px",
+              cursor: "pointer",
+              fontSize: "20px",
+              color: "#00bcd4"
+            }}
+          />
 
           <h2 style={{
             textAlign: "center",
@@ -94,10 +108,7 @@ function LoginPage() {
           </h2>
 
           {error && (
-            <p style={{
-              color: "red",
-              fontSize: "14px"
-            }}>
+            <p style={{ color: "red", fontSize: "14px" }}>
               {error}
             </p>
           )}
@@ -120,10 +131,7 @@ function LoginPage() {
             required
           />
 
-          <button
-            type="submit"
-            style={buttonStyle}
-          >
+          <button type="submit" style={buttonStyle}>
             Login
           </button>
 
