@@ -90,8 +90,9 @@ function SignupPage() {
       const data = await response.json();
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        alert("Signup successful! Please log in.");
+        // localStorage.setItem("token", data.token);
+        navigate("/login");
       } else {
         setError(data.message || "Signup failed");
       }
