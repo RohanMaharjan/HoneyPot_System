@@ -61,7 +61,7 @@ function LoginPage() {
       setError("Server error");
     }
   };
-
+  
   return (
     <>
       <Navbar />
@@ -78,12 +78,13 @@ function LoginPage() {
         <form
           onSubmit={handleSubmit}
           style={{
-            background: "#1e1e1e",
-            padding: "40px",
-            borderRadius: "10px",
-            width: "350px",
-            position: "relative"
-          }}
+              background: "#1e1e1e",
+              padding: "30px",
+              borderRadius: "10px",
+              width: "280px",   // slimmer width
+              position: "relative",
+              boxShadow: "0 0 15px rgba(0,0,0,0.5)"
+            }}
         >
 
           {/* Home Icon */}
@@ -143,8 +144,8 @@ function LoginPage() {
 
 const inputStyle = {
   width: "100%",
-  padding: "10px",
-  marginBottom: "15px",
+  padding: "9px",
+  marginBottom: "12px",
   borderRadius: "6px",
   border: "none"
 };
