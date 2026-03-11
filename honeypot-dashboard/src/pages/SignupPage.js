@@ -11,6 +11,35 @@ function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  const domains = [
+    "gmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "hotmail.com"
+  ];
+
+  // Email suggestion handler
+  const handleEmailChange = (e) => {
+
+    const value = e.target.value;
+    setEmail(value);
+
+    if (value.includes("@")) {
+
+      const namePart = value.split("@")[0];
+
+      const newSuggestions = domains.map(
+        (domain) => `${namePart}@${domain}`
+      );
+
+      setSuggestions(newSuggestions);
+
+    } else {
+      setSuggestions([]);
+    }
+  };
 
   const validateForm = () => {
 
@@ -135,13 +164,43 @@ function SignupPage() {
             style={inputStyle}
           />
 
+          {/* Email Input */}
           <input
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             style={inputStyle}
           />
+
+          {/* Email Suggestions */}
+          {suggestions.length > 0 && (
+            <div
+              style={{
+                background: "#272727",
+                borderRadius: "6px",
+                marginBottom: "10px",
+                overflow: "hidden"
+              }}
+            >
+              {suggestions.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setEmail(item);
+                    setSuggestions([]);
+                  }}
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid #333"
+                  }}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          )}
 
           <input
             type="password"
