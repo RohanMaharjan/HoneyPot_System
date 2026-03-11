@@ -12,6 +12,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [showPasswordOptions, setShowPasswordOptions] = useState(false);
 
   const domains = [
     "gmail.com",
@@ -98,6 +99,31 @@ function SignupPage() {
       setError("Server error");
     }
   };
+
+  //password suggestions
+  const generateStrongPassword = () => {
+
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*";
+
+  const allChars = upper + lower + numbers + symbols;
+
+  let password = "";
+  
+  password += upper[Math.floor(Math.random() * upper.length)];
+  password += lower[Math.floor(Math.random() * lower.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += symbols[Math.floor(Math.random() * symbols.length)];
+
+  for (let i = 4; i < 12; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  setPassword(password);
+  setShowPasswordOptions(false);
+};
 
   return (
     <>
@@ -206,9 +232,36 @@ function SignupPage() {
             type="password"
             placeholder="Password"
             value={password}
+            onFocus={() => setShowPasswordOptions(true)}
             onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}
           />
+
+            {showPasswordOptions && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginBottom: "12px"
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={generateStrongPassword}
+                  style={optionButton}
+                >
+                  Suggest Strong Password
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordOptions(false)}
+                  style={optionButton}
+                    >
+                        Create My Own
+                      </button>
+                    </div>
+                  )}
 
           <button type="submit" style={buttonStyle}>
             Create Account
@@ -247,6 +300,17 @@ const buttonStyle = {
   borderRadius: "6px",
   color: "#121212",
   fontWeight: "bold",
+  cursor: "pointer"
+};
+
+const optionButton = {
+  flex: 1,
+  padding: "6px",
+  fontSize: "12px",
+  backgroundColor: "#333",
+  border: "none",
+  borderRadius: "6px",
+  color: "#fff",
   cursor: "pointer"
 };
 
