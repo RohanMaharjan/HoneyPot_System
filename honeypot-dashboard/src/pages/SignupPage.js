@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaEye, FaEyeSlash } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 
 function SignupPage() {
@@ -13,6 +13,7 @@ function SignupPage() {
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showPasswordOptions, setShowPasswordOptions] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const domains = [
     "gmail.com",
@@ -187,7 +188,7 @@ function SignupPage() {
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
+            style={{ ...inputStyle, marginTop: "10px", marginBottom: "20px" }}
           />
 
           {/* Email Input */}
@@ -206,7 +207,7 @@ function SignupPage() {
                 background: "#272727",
                 borderRadius: "6px",
                 marginBottom: "10px",
-                overflow: "hidden"
+                overflow: "hidden",
               }}
             >
               {suggestions.map((item, index) => (
@@ -228,14 +229,33 @@ function SignupPage() {
             </div>
           )}
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onFocus={() => setShowPasswordOptions(true)}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-          />
+          {/* Password input with show/hide toggle and suggestions */}
+          <div style={{ position: "relative", marginBottom: "12px", width: "100%" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onFocus={() => setShowPasswordOptions(true)}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ ...inputStyle, marginBottom: "0px", paddingRight: "8px", marginTop:"10px" }}
+            />
+
+            {/* Eye Icon */}
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "5px",
+                marginTop:"5px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+                color: "#555"
+              }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
             {showPasswordOptions && (
               <div
@@ -263,7 +283,7 @@ function SignupPage() {
                     </div>
                   )}
 
-          <button type="submit" style={buttonStyle}>
+          <button type="submit" style={{ ...buttonStyle, width:"100%", marginBottom:"10px", marginTop:"10px" }}>
             Create Account
           </button>
 
