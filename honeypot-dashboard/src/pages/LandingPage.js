@@ -1,49 +1,101 @@
 // src/pages/LandingPage.js
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 function LandingPage() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  const handleGetStarted = () => {
+    if (token) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const features = [
+    "Detect port scanning attempts",
+    "Monitor web attacks in real-time",
+    "Store & analyze attack logs",
+    "User authentication for dashboard",
+    "Interactive charts and tables"
+  ];
+
   return (
     <>
       <Navbar />
 
       <div style={{
         minHeight: "90vh",
-        backgroundColor: "#121212",  // dark background
-        color: "#ffffff",            // white text
+        backgroundColor: "#121212",
+        color: "#fff",
         textAlign: "center",
-        padding: "50px 20px"
+        padding: "60px 20px",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
       }}>
-        <h1 style={{ fontSize: "36px", marginBottom: "20px" }}>
+        <h1 style={{ fontSize: "3rem", marginBottom: "20px", color: "#00bcd4" }}>
           Honeypot Web Attack Monitoring System
         </h1>
 
         <p style={{
-          maxWidth: "700px",
-          margin: "0 auto 30px",
-          fontSize: "18px",
-          lineHeight: "1.6"
+          maxWidth: "750px",
+          margin: "0 auto 40px",
+          fontSize: "1.2rem",
+          lineHeight: "1.8",
+          color: "#ccc"
         }}>
-          This system detects unauthorized network activity such as port scanning 
-          and web attacks. It collects attack logs in real-time, analyzes threat patterns, 
-          and provides an interactive dashboard for monitoring malicious activities.
+          Protect your network with real-time detection of port scanning and web attacks. 
+          Collect, store, and analyze attack logs to improve security and monitor threats with an interactive dashboard.
         </p>
 
-        <h3 style={{ marginBottom: "15px" }}>Features:</h3>
-        <ul style={{
-          listStyle: "disc",
-          maxWidth: "600px",
-          margin: "0 auto",
-          textAlign: "left",
-          fontSize: "16px",
-          lineHeight: "1.8"
+        <button 
+          onClick={handleGetStarted}
+          style={{
+            backgroundColor: "#00bcd4",
+            color: "#121212",
+            fontWeight: "bold",
+            padding: "12px 30px",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "16px",
+            marginBottom: "50px",
+            transition: "0.3s"
+          }}
+          onMouseOver={e => e.currentTarget.style.backgroundColor = "#0097a7"}
+          onMouseOut={e => e.currentTarget.style.backgroundColor = "#00bcd4"}
+        >
+          Get Started
+        </button>
+
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: "20px",
+          marginTop: "20px"
         }}>
-          <li>Detect port scanning attempts on your network</li>
-          <li>Monitor web attacks in real-time</li>
-          <li>Store and analyze attack logs in PostgreSQL</li>
-          <li>User authentication to protect dashboard access</li>
-          <li>Interactive dashboard with charts and tables</li>
-        </ul>
+          {features.map((feature, index) => (
+            <div key={index} style={{
+              backgroundColor: "#1e1e1e",
+              padding: "20px",
+              borderRadius: "10px",
+              minWidth: "180px",
+              maxWidth: "220px",
+              color: "#fff",
+              fontSize: "16px",
+              transition: "0.3s",
+              cursor: "default"
+            }}
+              onMouseOver={e => e.currentTarget.style.backgroundColor = "#272727"}
+              onMouseOut={e => e.currentTarget.style.backgroundColor = "#1e1e1e"}
+            >
+              {feature}
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

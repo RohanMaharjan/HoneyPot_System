@@ -1,58 +1,155 @@
-// src/pages/LoginPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const validateForm = () => {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;// simple email validation
+
+    const passwordRegex = /^(?=.*[!@#$%^&*]).{8,}$/;// at least 8 characters and one special character
+
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+
+    if (!passwordRegex.test(password)) {
+      return "Password must be at least 8 characters and include a special character";
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
 
-    const res = await fetch("http://localhost:5000/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    const validationError = validateForm();
 
-    const data = await res.json();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user || {}));
-      navigate("/dashboard");
-    } else {
-      alert("Login failed");
+    try {
+
+      const response = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Login failed");
+      }
+
+    } catch (err) {
+      setError("Server error");
     }
   };
 
   return (
     <>
       <Navbar />
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h2>Login</h2>
-        <form onSubmit={handleLogin}>
+
+      <div style={{
+        minHeight: "90vh",
+        backgroundColor: "#121212",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "#fff"
+      }}>
+
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            background: "#1e1e1e",
+            padding: "40px",
+            borderRadius: "10px",
+            width: "350px"
+          }}
+        >
+
+          <h2 style={{
+            textAlign: "center",
+            marginBottom: "25px",
+            color: "#00bcd4"
+          }}>
+            Login
+          </h2>
+
+          {error && (
+            <p style={{
+              color: "red",
+              fontSize: "14px"
+            }}>
+              {error}
+            </p>
+          )}
+
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            style={inputStyle}
+            required
           />
-          <br /><br />
+
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            style={inputStyle}
+            required
           />
-          <br /><br />
-          <button type="submit">Login</button>
+
+          <button
+            type="submit"
+            style={buttonStyle}
+          >
+            Login
+          </button>
+
         </form>
       </div>
     </>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginBottom: "15px",
+  borderRadius: "6px",
+  border: "none"
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: "12px",
+  backgroundColor: "#00bcd4",
+  border: "none",
+  borderRadius: "6px",
+  color: "#121212",
+  fontWeight: "bold",
+  cursor: "pointer"
+};
 
 export default LoginPage;
