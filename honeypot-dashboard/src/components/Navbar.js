@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";//imorting link and useNavbigate from react-router-dim for navigation
+import { Link, useNavigate } from "react-router-dom";//importing link and useNavbigate from react-router-dim for navigation
 
 function Navbar() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ function Navbar() {
       backgroundColor:"#1f1f1f",
       color:"#fff"
     }}>
-      <div style={{fontWeight:"bold", fontSize:"20px"}}>Honeypot Monitoring</div>
+      <div style={{fontWeight:"bold", fontSize:"20px"}}>Honeypot Monitoring System</div>
       
       <div>
         {!token ? (
