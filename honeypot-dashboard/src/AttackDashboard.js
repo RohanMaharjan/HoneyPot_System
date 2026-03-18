@@ -40,24 +40,28 @@ function AttackDashboard() {
   const fetchAttacks = () => {
     fetch("http://localhost:5000/attacks")
       .then(res => res.json())
-      .then(data => setAttacks(data))
+      .then(data => {
+        console.log("API DATA:", data); // 🔍 DEBUG
+        setAttacks(data);
+      })
       .catch(err => console.error(err));
   };
 
-  // =========================
+  // SAFE IP HANDLER 🔥
+  const getIP = (a) => {
+    return a.ip || a.ip_address || a.address || "Unknown";
+  };
+
   // FILTER LOGIC
-  // =========================
   const filteredAttacks =
     selectedPort === "All"
       ? attacks
       : attacks.filter(a => String(a.port) === selectedPort);
 
-  // =========================
   // Stats
-  // =========================
   const totalAttacks = filteredAttacks.length;
 
-  const uniqueIPs = new Set(filteredAttacks.map(a => a.ip)).size;
+  const uniqueIPs = new Set(filteredAttacks.map(a => getIP(a))).size;
 
   const lastAttack =
     filteredAttacks.length > 0
@@ -91,7 +95,9 @@ function AttackDashboard() {
     ]
   };
 
+  // =========================
   // Feed + Table
+  // =========================
   const attackFeed = filteredAttacks.slice(-5).reverse();
   const recentTable = filteredAttacks.slice(-10).reverse();
 
@@ -162,7 +168,7 @@ function AttackDashboard() {
             {attackFeed.map((a, i) => (
               <div key={i} style={styles.feedCard}>
                 <h4>Port {a.port}</h4>
-                <p>IP: {a.ip}</p>
+                <p>IP: {getIP(a)}</p>
                 <p>{new Date(a.timestamp).toLocaleString()}</p>
               </div>
             ))}
@@ -192,7 +198,7 @@ function AttackDashboard() {
             <tbody>
               {recentTable.map((a, i) => (
                 <tr key={i}>
-                  <td>{a.ip}</td>
+                  <td>{getIP(a)}</td>
                   <td>{a.port}</td>
                   <td>{new Date(a.timestamp).toLocaleString()}</td>
                 </tr>
