@@ -1,8 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
-import {
-  Line
-} from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -25,39 +23,77 @@ ChartJS.register(
 
 function AttackDashboard() {
 
-  const stats = [
-    { title: "Total Attacks", value: 125, color: "#3b82f6" },
-    { title: "Unique IPs", value: 30, color: "#22c55e" },
-    { title: "Recent Attack", value: "5m Ago", color: "#f59e0b" },
-    { title: "DB Status", value: "Connected", color: "#ef4444" }
-  ];
+  const [attacks, setAttacks] = useState([]);
+  const [selectedPort, setSelectedPort] = useState("All");
 
-  const attackFeed = [
-    { port: "21 - FTP", ip: "127.0.0.1", time: "13:02:15" },
-    { port: "22 - SSH", ip: "127.0.0.1", time: "13:03:10" },
-    { port: "80 - HTTP", ip: "127.0.0.1", time: "13:03:30" }
-  ];
+  // Fetch Data
+  useEffect(() => {
+    fetchAttacks();
+
+    const interval = setInterval(() => {
+      fetchAttacks();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchAttacks = () => {
+    fetch("http://localhost:5000/attacks")
+      .then(res => res.json())
+      .then(data => setAttacks(data))
+      .catch(err => console.error(err));
+  };
+
+  // =========================
+  // FILTER LOGIC
+  // =========================
+  const filteredAttacks =
+    selectedPort === "All"
+      ? attacks
+      : attacks.filter(a => String(a.port) === selectedPort);
+
+  // =========================
+  // Stats
+  // =========================
+  const totalAttacks = filteredAttacks.length;
+
+  const uniqueIPs = new Set(filteredAttacks.map(a => a.ip)).size;
+
+  const lastAttack =
+    filteredAttacks.length > 0
+      ? new Date(filteredAttacks[filteredAttacks.length - 1].timestamp).toLocaleTimeString()
+      : "No Data";
+
+  // =========================
+  // Chart Data
+  // =========================
+  const groupByTime = {};
+
+  filteredAttacks.forEach(a => {
+    const time = new Date(a.timestamp).getHours() + ":00";
+
+    if (!groupByTime[time]) {
+      groupByTime[time] = 0;
+    }
+
+    groupByTime[time]++;
+  });
 
   const chartData = {
-    labels: ["12:50", "12:55", "13:00", "13:05", "13:10"],
+    labels: Object.keys(groupByTime),
     datasets: [
       {
-        label: "FTP",
-        data: [0, 10, 13, 9, 4],
-        borderColor: "#3b82f6"
-      },
-      {
-        label: "SSH",
-        data: [0, 5, 3, 4, 8],
-        borderColor: "#22c55e"
-      },
-      {
-        label: "Telnet",
-        data: [0, 1, 7, 5, 11],
-        borderColor: "#f59e0b"
+        label: "Attacks",
+        data: Object.values(groupByTime),
+        borderColor: "#3b82f6",
+        tension: 0.4
       }
     ]
   };
+
+  // Feed + Table
+  const attackFeed = filteredAttacks.slice(-5).reverse();
+  const recentTable = filteredAttacks.slice(-10).reverse();
 
   return (
     <>
@@ -69,44 +105,65 @@ function AttackDashboard() {
           Honeypot Web Attack Dashboard
         </h2>
 
-        {/* Top Stats */}
+        {/* Stats */}
         <div style={styles.statsRow}>
-          {stats.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                ...styles.card,
-                background: item.color
-              }}
-            >
-              <h4>{item.title}</h4>
-              <h2>{item.value}</h2>
-            </div>
-          ))}
+
+          <div style={{ ...styles.card, background: "#3b82f6" }}>
+            <h4>Total Attacks</h4>
+            <h2>{totalAttacks}</h2>
+          </div>
+
+          <div style={{ ...styles.card, background: "#22c55e" }}>
+            <h4>Unique IPs</h4>
+            <h2>{uniqueIPs}</h2>
+          </div>
+
+          <div style={{ ...styles.card, background: "#f59e0b" }}>
+            <h4>Last Attack</h4>
+            <h2>{lastAttack}</h2>
+          </div>
+
+          <div style={{ ...styles.card, background: "#ef4444" }}>
+            <h4>DB Status</h4>
+            <h2>Connected</h2>
+          </div>
+
         </div>
 
         {/* Filters */}
         <div style={styles.filters}>
           <span>Filter by Port:</span>
 
-          {["All", "FTP 21", "SSH 22", "Telnet 23", "HTTP 80", "MySQL 3306"].map((f, i) => (
-            <button key={i} style={styles.filterBtn}>
-              {f}
+          {["All", "21", "22", "23", "80", "3306"].map((port, i) => (
+            <button
+              key={i}
+              onClick={() => setSelectedPort(port)}
+              style={{
+                ...styles.filterBtn,
+                background: selectedPort === port ? "#3b82f6" : "#1e293b"
+              }}
+            >
+              {port === "All" ? "All" : `Port ${port}`}
             </button>
           ))}
         </div>
 
+        {/* Grid */}
         <div style={styles.grid}>
 
           {/* Live Feed */}
           <div style={styles.panel}>
-            <h3>Live Attack Feed</h3>
+            <h3>
+              Live Attack Feed (
+              {selectedPort === "All" ? "All Ports" : `Port ${selectedPort}`}
+              )
+            </h3>
 
-            {attackFeed.map((attack, i) => (
+            {attackFeed.map((a, i) => (
               <div key={i} style={styles.feedCard}>
-                <h4>Port {attack.port}</h4>
-                <p>IP: {attack.ip}</p>
-                <p>Time: {attack.time}</p>
+                <h4>Port {a.port}</h4>
+                <p>IP: {a.ip}</p>
+                <p>{new Date(a.timestamp).toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -119,7 +176,7 @@ function AttackDashboard() {
 
         </div>
 
-        {/* Recent IP Table */}
+        {/* Table */}
         <div style={styles.panel}>
           <h3>Recent IPs</h3>
 
@@ -133,11 +190,11 @@ function AttackDashboard() {
             </thead>
 
             <tbody>
-              {attackFeed.map((attack, i) => (
+              {recentTable.map((a, i) => (
                 <tr key={i}>
-                  <td>{attack.ip}</td>
-                  <td>{attack.port}</td>
-                  <td>{attack.time}</td>
+                  <td>{a.ip}</td>
+                  <td>{a.port}</td>
+                  <td>{new Date(a.timestamp).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -152,6 +209,8 @@ function AttackDashboard() {
 
 export default AttackDashboard;
 
+
+// Styles
 const styles = {
 
   page: {
