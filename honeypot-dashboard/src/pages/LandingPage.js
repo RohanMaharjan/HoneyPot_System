@@ -5,14 +5,12 @@ import Navbar from "../components/Navbar";
 
 function LandingPage() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const handleGetStarted = () => {
-    if (token) {
+    
       navigate("/dashboard");
-    } else {
-      navigate("/login");
-    }
+    
   };
 
   const features = [
