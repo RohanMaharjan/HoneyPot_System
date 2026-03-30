@@ -26,80 +26,89 @@ function AttackDashboard() {
   const [attacks, setAttacks] = useState([]);
   const [selectedPort, setSelectedPort] = useState("All");
 
-  // Fetch Data
+  // =========================
+  // FETCH DATA
+  // =========================
   useEffect(() => {
     fetchAttacks();
 
-    const interval = setInterval(() => {
-      fetchAttacks();
-    }, 5000);
-
+    const interval = setInterval(fetchAttacks, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchAttacks = () => {
-    fetch("http://localhost:5000/attacks")
-      .then(res => res.json())
-      .then(data => {
-        console.log("API DATA:", data); // 🔍 DEBUG
-        setAttacks(data);
-      })
-      .catch(err => console.error(err));
+  const fetchAttacks = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/attacks");
+      const data = await res.json();
+      setAttacks(data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
   };
 
+  // =========================
   // SAFE IP HANDLER 🔥
+  // =========================
   const getIP = (a) => {
-    return a.ip || a.ip_address || a.address || "Unknown";
+    return a.ip_address || a.ip || "Unknown";
   };
 
+  // =========================
   // FILTER LOGIC
+  // =========================
   const filteredAttacks =
     selectedPort === "All"
       ? attacks
       : attacks.filter(a => String(a.port) === selectedPort);
 
-  // Stats
+  // =========================
+  // STATS
+  // =========================
   const totalAttacks = filteredAttacks.length;
 
-  const uniqueIPs = new Set(filteredAttacks.map(a => getIP(a))).size;
+  const uniqueIPs = new Set(
+    filteredAttacks.map(a => getIP(a))
+  ).size;
 
   const lastAttack =
     filteredAttacks.length > 0
-      ? new Date(filteredAttacks[filteredAttacks.length - 1].timestamp).toLocaleTimeString()
+      ? new Date(filteredAttacks[0].timestamp).toLocaleString()
       : "No Data";
 
   // =========================
-  // Chart Data
+  // CHART DATA (Sorted 🔥)
   // =========================
   const groupByTime = {};
 
   filteredAttacks.forEach(a => {
-    const time = new Date(a.timestamp).getHours() + ":00";
+    const date = new Date(a.timestamp);
+    const label = `${date.getHours()}:00`;
 
-    if (!groupByTime[time]) {
-      groupByTime[time] = 0;
-    }
+    groupByTime[label] = (groupByTime[label] || 0) + 1;
+  });
 
-    groupByTime[time]++;
+  const sortedLabels = Object.keys(groupByTime).sort((a, b) => {
+    return parseInt(a) - parseInt(b);
   });
 
   const chartData = {
-    labels: Object.keys(groupByTime),
+    labels: sortedLabels,
     datasets: [
       {
-        label: "Attacks",
-        data: Object.values(groupByTime),
+        label: "Attacks per Hour",
+        data: sortedLabels.map(l => groupByTime[l]),
         borderColor: "#3b82f6",
+        backgroundColor: "#3b82f6",
         tension: 0.4
       }
     ]
   };
 
   // =========================
-  // Feed + Table
+  // FEED + TABLE
   // =========================
-  const attackFeed = filteredAttacks.slice(-5).reverse();
-  const recentTable = filteredAttacks.slice(-10).reverse();
+  const attackFeed = filteredAttacks.slice(0, 5);
+  const recentTable = filteredAttacks.slice(0, 10);
 
   return (
     <>
@@ -108,10 +117,12 @@ function AttackDashboard() {
       <div style={styles.page}>
 
         <h2 style={styles.title}>
-          Honeypot Web Attack Dashboard
+          Honeypot Attack Monitoring Dashboard
         </h2>
 
-        {/* Stats */}
+        {/* ========================= */}
+        {/* STATS */}
+        {/* ========================= */}
         <div style={styles.statsRow}>
 
           <div style={{ ...styles.card, background: "#3b82f6" }}>
@@ -131,14 +142,16 @@ function AttackDashboard() {
 
           <div style={{ ...styles.card, background: "#ef4444" }}>
             <h4>DB Status</h4>
-            <h2>Connected</h2>
+            <h2>{attacks.length > 0 ? "Active" : "No Data"}</h2>
           </div>
 
         </div>
 
-        {/* Filters */}
+        {/* ========================= */}
+        {/* FILTER */}
+        {/* ========================= */}
         <div style={styles.filters}>
-          <span>Filter by Port:</span>
+          <span style={{ marginRight: "10px" }}>Filter by Port:</span>
 
           {["All", "21", "22", "23", "80", "3306"].map((port, i) => (
             <button
@@ -146,7 +159,8 @@ function AttackDashboard() {
               onClick={() => setSelectedPort(port)}
               style={{
                 ...styles.filterBtn,
-                background: selectedPort === port ? "#3b82f6" : "#1e293b"
+                background:
+                  selectedPort === port ? "#3b82f6" : "#1e293b"
               }}
             >
               {port === "All" ? "All" : `Port ${port}`}
@@ -154,10 +168,12 @@ function AttackDashboard() {
           ))}
         </div>
 
-        {/* Grid */}
+        {/* ========================= */}
+        {/* GRID */}
+        {/* ========================= */}
         <div style={styles.grid}>
 
-          {/* Live Feed */}
+          {/* LIVE FEED */}
           <div style={styles.panel}>
             <h3>
               Live Attack Feed (
@@ -172,9 +188,11 @@ function AttackDashboard() {
                 <p>{new Date(a.timestamp).toLocaleString()}</p>
               </div>
             ))}
+
+            {attackFeed.length === 0 && <p>No data</p>}
           </div>
 
-          {/* Chart */}
+          {/* CHART */}
           <div style={styles.panel}>
             <h3>Attack Statistics</h3>
             <Line data={chartData} />
@@ -182,9 +200,11 @@ function AttackDashboard() {
 
         </div>
 
-        {/* Table */}
+        {/* ========================= */}
+        {/* TABLE */}
+        {/* ========================= */}
         <div style={styles.panel}>
-          <h3>Recent IPs</h3>
+          <h3>Recent Attacks</h3>
 
           <table style={styles.table}>
             <thead>
@@ -215,8 +235,9 @@ function AttackDashboard() {
 
 export default AttackDashboard;
 
-
-// Styles
+// =========================
+// STYLES
+// =========================
 const styles = {
 
   page: {
