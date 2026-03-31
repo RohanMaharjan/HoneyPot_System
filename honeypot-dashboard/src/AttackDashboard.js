@@ -28,12 +28,9 @@ function AttackDashboard() {
   const [selectedPort, setSelectedPort] = useState("All");
   const navigate = useNavigate();
 
-  // =========================
   // FETCH DATA
-  // =========================
   useEffect(() => {
     fetchAttacks();
-
     const interval = setInterval(fetchAttacks, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -48,50 +45,53 @@ function AttackDashboard() {
     }
   };
 
-  // =========================
-  // SAFE IP HANDLER 🔥
-  // =========================
+  // CLEAN IP HANDLER 🔥
   const getIP = (a) => {
-    return a.ip_address || a.ip || "Unknown";
+    let ip = a.ip_address || a.ip || "Unknown";
+
+    if (ip === "::1") return "127.0.0.1 (localhost)";
+    if (ip.startsWith("::ffff:")) return ip.replace("::ffff:", "");
+
+    return ip;
   };
 
-  // =========================
-  // FILTER LOGIC
-  // =========================
+  // FILTER
   const filteredAttacks =
     selectedPort === "All"
       ? attacks
       : attacks.filter(a => String(a.port) === selectedPort);
 
-  // =========================
+  // SORT (IMPORTANT 🔥)
+  const sortedAttacks = [...filteredAttacks].sort(
+    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+  );
+
   // STATS
-  // =========================
-  const totalAttacks = filteredAttacks.length;
+  const totalAttacks = sortedAttacks.length;
 
   const uniqueIPs = new Set(
-    filteredAttacks.map(a => getIP(a))
+    sortedAttacks.map(a => getIP(a))
   ).size;
 
   const lastAttack =
-    filteredAttacks.length > 0
-      ? new Date(filteredAttacks[0].timestamp).toLocaleString()
+    sortedAttacks.length > 0
+      ? new Date(sortedAttacks[0].timestamp).toLocaleString()
       : "No Data";
 
   // =========================
-  // CHART DATA (Sorted 🔥)
+  // CHART DATA
   // =========================
   const groupByTime = {};
 
-  filteredAttacks.forEach(a => {
+  sortedAttacks.forEach(a => {
     const date = new Date(a.timestamp);
     const label = `${date.getHours()}:00`;
-
     groupByTime[label] = (groupByTime[label] || 0) + 1;
   });
 
-  const sortedLabels = Object.keys(groupByTime).sort((a, b) => {
-    return parseInt(a) - parseInt(b);
-  });
+  const sortedLabels = Object.keys(groupByTime).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
 
   const chartData = {
     labels: sortedLabels,
@@ -106,17 +106,17 @@ function AttackDashboard() {
     ]
   };
 
-  // =========================
   // FEED + TABLE
-  // =========================
-  const attackFeed = filteredAttacks.slice(0, 5);
-  const recentTable = filteredAttacks.slice(0, 10);
+  const attackFeed = sortedAttacks.slice(0, 5);
+  const recentTable = sortedAttacks.slice(0, 10);
 
   return (
     <>
       <Navbar />
 
       <div style={styles.page}>
+
+        {/* BACK BUTTON */}
         <button onClick={() => navigate("/")} style={styles.backBtn}>
           ← Back to Home
         </button>
@@ -125,9 +125,7 @@ function AttackDashboard() {
           Honeypot Attack Monitoring Dashboard
         </h2>
 
-        {/* ========================= */}
         {/* STATS */}
-        {/* ========================= */}
         <div style={styles.statsRow}>
 
           <div style={{ ...styles.card, background: "#3b82f6" }}>
@@ -152,11 +150,9 @@ function AttackDashboard() {
 
         </div>
 
-        {/* ========================= */}
         {/* FILTER */}
-        {/* ========================= */}
         <div style={styles.filters}>
-          <span style={{ marginRight: "10px" }}>Filter by Port:</span>
+          <span>Filter by Port:</span>
 
           {["All", "21", "22", "23", "80", "3306"].map((port, i) => (
             <button
@@ -164,8 +160,7 @@ function AttackDashboard() {
               onClick={() => setSelectedPort(port)}
               style={{
                 ...styles.filterBtn,
-                background:
-                  selectedPort === port ? "#3b82f6" : "#1e293b"
+                background: selectedPort === port ? "#3b82f6" : "#1e293b"
               }}
             >
               {port === "All" ? "All" : `Port ${port}`}
@@ -173,18 +168,12 @@ function AttackDashboard() {
           ))}
         </div>
 
-        {/* ========================= */}
         {/* GRID */}
-        {/* ========================= */}
         <div style={styles.grid}>
 
           {/* LIVE FEED */}
-          <div style={styles.panel}>
-            <h3>
-              Live Attack Feed (
-              {selectedPort === "All" ? "All Ports" : `Port ${selectedPort}`}
-              )
-            </h3>
+          <div style={styles.panelDark}>
+            <h3>Live Attack Feed</h3>
 
             {attackFeed.map((a, i) => (
               <div key={i} style={styles.feedCard}>
@@ -198,33 +187,33 @@ function AttackDashboard() {
           </div>
 
           {/* CHART */}
-          <div style={styles.panel}>
+          <div style={styles.panelLight}>
             <h3>Attack Statistics</h3>
             <Line data={chartData} />
           </div>
 
         </div>
 
-        {/* ========================= */}
         {/* TABLE */}
-        {/* ========================= */}
-        <div style={styles.panel}>
+        <div style={styles.panelLight}>
           <h3>Recent Attacks</h3>
 
           <table style={styles.table}>
             <thead>
               <tr>
+                <th style={styles.left}>#</th>
                 <th>IP Address</th>
-                <th>Port</th>
+                <th style={styles.left}>Port</th>
                 <th>Timestamp</th>
               </tr>
             </thead>
 
             <tbody>
               {recentTable.map((a, i) => (
-                <tr key={i}>
+                <tr key={i} style={styles.tableRow}>
+                  <td style={styles.center}>{i + 1}</td>
                   <td>{getIP(a)}</td>
-                  <td>{a.port}</td>
+                  <td style={styles.center}>{a.port}</td>
                   <td>{new Date(a.timestamp).toLocaleString()}</td>
                 </tr>
               ))}
@@ -240,9 +229,7 @@ function AttackDashboard() {
 
 export default AttackDashboard;
 
-// =========================
 // STYLES
-// =========================
 const styles = {
 
   page: {
@@ -250,6 +237,16 @@ const styles = {
     minHeight: "100vh",
     color: "white",
     padding: "30px"
+  },
+
+  backBtn: {
+    marginBottom: "20px",
+    padding: "8px 15px",
+    background: "#334155",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer"
   },
 
   title: {
@@ -289,10 +286,17 @@ const styles = {
     marginBottom: "20px"
   },
 
-  panel: {
+  panelDark: {
     background: "#1e293b",
     padding: "20px",
     borderRadius: "10px"
+  },
+
+  panelLight: {
+    background: "#ffffff",
+    padding: "20px",
+    borderRadius: "10px",
+    color: "black"
   },
 
   feedCard: {
@@ -307,14 +311,15 @@ const styles = {
     borderCollapse: "collapse"
   },
 
-  backBtn: {
-  marginBottom: "20px",
-  padding: "8px 15px",
-  background: "#334155",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer"
-}
+  tableRow: {
+    borderBottom: "1px solid #ccc"
+  },
 
+  portBadge: {
+    background: "#3b82f6",
+    padding: "4px 8px",
+    borderRadius: "5px",
+    fontSize: "12px",
+    color: "white"
+  }
 };
