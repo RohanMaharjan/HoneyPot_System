@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 
 function LandingPage() {
   const navigate = useNavigate();
-  // const token = localStorage.getItem("token");
 
   const handleGetStarted = () => {
     
@@ -17,7 +16,7 @@ function LandingPage() {
     "Detect port scanning attempts",
     "Monitor web attacks in real-time",
     "Store & analyze attack logs",
-    "User authentication for dashboard",
+    "Open access to thedashboard",
     "Interactive charts and tables"
   ];
 

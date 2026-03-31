@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
+import { useNavigate } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 
 import {
@@ -25,6 +26,7 @@ function AttackDashboard() {
 
   const [attacks, setAttacks] = useState([]);
   const [selectedPort, setSelectedPort] = useState("All");
+  const navigate = useNavigate();
 
   // =========================
   // FETCH DATA
@@ -115,6 +117,9 @@ function AttackDashboard() {
       <Navbar />
 
       <div style={styles.page}>
+        <button onClick={() => navigate("/")} style={styles.backBtn}>
+          ← Back to Home
+        </button>
 
         <h2 style={styles.title}>
           Honeypot Attack Monitoring Dashboard
@@ -300,5 +305,16 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse"
-  }
+  },
+
+  backBtn: {
+  marginBottom: "20px",
+  padding: "8px 15px",
+  background: "#334155",
+  color: "white",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer"
+}
+
 };
