@@ -78,9 +78,7 @@ function AttackDashboard() {
       ? new Date(sortedAttacks[0].timestamp).toLocaleString()
       : "No Data";
 
-  // =========================
   // CHART DATA
-  // =========================
   const groupByTime = {};
 
   sortedAttacks.forEach(a => {
@@ -107,7 +105,7 @@ function AttackDashboard() {
   };
 
   // FEED + TABLE
-  const attackFeed = sortedAttacks.slice(0, 5);
+  const attackFeed = sortedAttacks;
   const recentTable = sortedAttacks.slice(0, 10);
 
   return (
@@ -173,17 +171,19 @@ function AttackDashboard() {
 
           {/* LIVE FEED */}
           <div style={styles.panelDark}>
-            <h3>Live Attack Feed</h3>
+            <h3 style={styles.titleFixed}>Live Attack Feed</h3>
 
-            {attackFeed.map((a, i) => (
-              <div key={i} style={styles.feedCard}>
-                <h4>Port {a.port}</h4>
-                <p>IP: {getIP(a)}</p>
-                <p>{new Date(a.timestamp).toLocaleString()}</p>
-              </div>
-            ))}
+            <div style={styles.feedScroll}>
+              {attackFeed.map((a, i) => (
+                <div key={i} style={styles.feedCard}>
+                  <h4>Port {a.port}</h4>
+                  <p>IP: {getIP(a)}</p>
+                  <p>{new Date(a.timestamp).toLocaleString()}</p>
+                </div>
+              ))}
 
-            {attackFeed.length === 0 && <p>No data</p>}
+              {attackFeed.length === 0 && <p>No data</p>}
+            </div>
           </div>
 
           {/* CHART */}
@@ -289,7 +289,8 @@ const styles = {
   panelDark: {
     background: "#1e293b",
     padding: "20px",
-    borderRadius: "10px"
+    borderRadius: "10px",
+    scrollBehavior: "smooth"  
   },
 
   panelLight: {
@@ -297,13 +298,6 @@ const styles = {
     padding: "20px",
     borderRadius: "10px",
     color: "black"
-  },
-
-  feedCard: {
-    background: "#334155",
-    padding: "10px",
-    borderRadius: "6px",
-    marginBottom: "10px"
   },
 
   table: {
@@ -321,5 +315,27 @@ const styles = {
     borderRadius: "5px",
     fontSize: "12px",
     color: "white"
+  },
+
+  titleFixed: {
+    margin: 0,
+    fontWeight: "bold",
+    color: "white",
+    paddingBottom: "10px",
+  },
+
+  feedScroll: {
+    maxHeight: "350px",
+    overflowY: "auto",
+    scrollBehavior: "smooth"
+  },
+
+  feedCard: {
+    background: "#334155",
+    padding: "10px",
+    borderRadius: "6px",
+    marginBottom: "10px"
   }
+
+
 };
