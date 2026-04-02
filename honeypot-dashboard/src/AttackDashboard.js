@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { Line } from "react-chartjs-2";
+import { Line, Pie } from "react-chartjs-2";
 
 import {
   Chart as ChartJS,
@@ -9,6 +9,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  ArcElement,
   Tooltip,
   Legend
 } from "chart.js";
@@ -18,17 +19,16 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  ArcElement,
   Tooltip,
   Legend
 );
 
 function AttackDashboard() {
-
   const [attacks, setAttacks] = useState([]);
   const [selectedPort, setSelectedPort] = useState("All");
   const navigate = useNavigate();
 
-  // FETCH DATA
   useEffect(() => {
     fetchAttacks();
     const interval = setInterval(fetchAttacks, 5000);
@@ -45,28 +45,22 @@ function AttackDashboard() {
     }
   };
 
-  // CLEAN IP HANDLER 🔥
   const getIP = (a) => {
     let ip = a.ip_address || a.ip || "Unknown";
-
     if (ip === "::1") return "127.0.0.1 (localhost)";
     if (ip.startsWith("::ffff:")) return ip.replace("::ffff:", "");
-
     return ip;
   };
 
-  // FILTER
   const filteredAttacks =
     selectedPort === "All"
       ? attacks
       : attacks.filter(a => String(a.port) === selectedPort);
 
-  // SORT (IMPORTANT 🔥)
   const sortedAttacks = [...filteredAttacks].sort(
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
   );
 
-  // STATS
   const totalAttacks = sortedAttacks.length;
 
   const uniqueIPs = new Set(
@@ -78,9 +72,8 @@ function AttackDashboard() {
       ? new Date(sortedAttacks[0].timestamp).toLocaleString()
       : "No Data";
 
-  // CHART DATA
+  // LINE CHART
   const groupByTime = {};
-
   sortedAttacks.forEach(a => {
     const date = new Date(a.timestamp);
     const label = `${date.getHours()}:00`;
@@ -104,7 +97,23 @@ function AttackDashboard() {
     ]
   };
 
-  // FEED + TABLE
+  // PIE CHART
+  const portCounts = {};
+  sortedAttacks.forEach(a => {
+    const port = a.port;
+    portCounts[port] = (portCounts[port] || 0) + 1;
+  });
+
+  const pieData = {
+    labels: Object.keys(portCounts),
+    datasets: [
+      {
+        data: Object.values(portCounts),
+        backgroundColor: ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"]
+      }
+    ]
+  };
+
   const attackFeed = sortedAttacks;
   const recentTable = sortedAttacks.slice(0, 10);
 
@@ -113,8 +122,6 @@ function AttackDashboard() {
       <Navbar />
 
       <div style={styles.page}>
-
-        {/* BACK BUTTON */}
         <button onClick={() => navigate("/")} style={styles.backBtn}>
           ← Back to Home
         </button>
@@ -125,7 +132,6 @@ function AttackDashboard() {
 
         {/* STATS */}
         <div style={styles.statsRow}>
-
           <div style={{ ...styles.card, background: "#3b82f6" }}>
             <h4>Total Attacks</h4>
             <h2>{totalAttacks}</h2>
@@ -145,13 +151,11 @@ function AttackDashboard() {
             <h4>DB Status</h4>
             <h2>{attacks.length > 0 ? "Active" : "No Data"}</h2>
           </div>
-
         </div>
 
         {/* FILTER */}
         <div style={styles.filters}>
           <span>Filter by Port:</span>
-
           {["All", "21", "22", "23", "80", "3306"].map((port, i) => (
             <button
               key={i}
@@ -168,7 +172,6 @@ function AttackDashboard() {
 
         {/* GRID */}
         <div style={styles.grid}>
-
           {/* LIVE FEED */}
           <div style={styles.panelDark}>
             <h3 style={styles.titleFixed}>Live Attack Feed</h3>
@@ -181,47 +184,76 @@ function AttackDashboard() {
                   <p>{new Date(a.timestamp).toLocaleString()}</p>
                 </div>
               ))}
-
-              {attackFeed.length === 0 && <p>No data</p>}
             </div>
           </div>
 
-          {/* CHART */}
+          {/* LINE CHART */}
           <div style={styles.panelLight}>
             <h3>Attack Statistics</h3>
             <Line data={chartData} />
           </div>
-
         </div>
 
-        {/* TABLE */}
-        <div style={styles.panelLight}>
-          <h3>Recent Attacks</h3>
+        {/* TABLE + PIE */}
+        <div style={styles.grid}>
+          {/* TABLE */}
+          <div style={styles.panelDark}>
+            <h3>Recent Attacks</h3>
 
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.left}>#</th>
-                <th>IP Address</th>
-                <th style={styles.left}>Port</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>#</th>
+                    <th style={styles.th}>IP Address</th>
+                    <th style={styles.th}>Port</th>
+                    <th style={styles.th}>Timestamp</th>
+                  </tr>
+                </thead>
 
-            <tbody>
-              {recentTable.map((a, i) => (
-                <tr key={i} style={styles.tableRow}>
-                  <td style={styles.center}>{i + 1}</td>
-                  <td>{getIP(a)}</td>
-                  <td style={styles.center}>{a.port}</td>
-                  <td>{new Date(a.timestamp).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                <tbody>
+                  {recentTable.map((a, i) => (
+                    <tr
+                      key={i}
+                      style={styles.tableRow}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#334155")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <td style={styles.td}>{i + 1}</td>
+                      <td style={styles.td}>{getIP(a)}</td>
+                      <td style={styles.td}>
+                        <span style={styles.portBadge}>{a.port}</span>
+                      </td>
+                      <td style={styles.td}>
+                        {new Date(a.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
+          {/* PIE */}
+          <div style={styles.panelLight}>
+            <h3>Port Distribution</h3>
+            <Pie
+              data={pieData}
+              options={{
+                plugins: {
+                  legend: {
+                    position: "right"
+                  }
+                },
+                radius: "70%"
+              }}
+            />
+          </div>
         </div>
-
       </div>
     </>
   );
@@ -231,7 +263,6 @@ export default AttackDashboard;
 
 // STYLES
 const styles = {
-
   page: {
     background: "#0f172a",
     minHeight: "100vh",
@@ -272,10 +303,9 @@ const styles = {
   filterBtn: {
     margin: "5px",
     padding: "8px 12px",
-    background: "#1e293b",
+    borderRadius: "5px",
     color: "white",
     border: "none",
-    borderRadius: "5px",
     cursor: "pointer"
   },
 
@@ -289,8 +319,7 @@ const styles = {
   panelDark: {
     background: "#1e293b",
     padding: "20px",
-    borderRadius: "10px",
-    scrollBehavior: "smooth"  
+    borderRadius: "10px"
   },
 
   panelLight: {
@@ -300,17 +329,35 @@ const styles = {
     color: "black"
   },
 
+
+  tableWrapper: {
+    maxHeight: "300px"
+  },
+
   table: {
     width: "100%",
-    borderCollapse: "collapse"
+    borderCollapse: "collapse",
+    marginTop: "10px"
+  },
+
+  th: {
+    padding: "12px",
+    textAlign: "left",
+    borderBottom: "2px solid #475569",
+    color: "#cbd5f5"
+  },
+
+  td: {
+    padding: "10px",
+    borderBottom: "1px solid #334155",
+    whiteSpace: "nowrap"
   },
 
   tableRow: {
-    borderBottom: "1px solid #ccc"
+    transition: "0.2s"
   },
 
   portBadge: {
-    background: "#3b82f6",
     padding: "4px 8px",
     borderRadius: "5px",
     fontSize: "12px",
@@ -319,15 +366,12 @@ const styles = {
 
   titleFixed: {
     margin: 0,
-    fontWeight: "bold",
-    color: "white",
-    paddingBottom: "10px",
+    paddingBottom: "10px"
   },
 
   feedScroll: {
     maxHeight: "350px",
-    overflowY: "auto",
-    scrollBehavior: "smooth"
+    overflowY: "auto"
   },
 
   feedCard: {
@@ -336,6 +380,4 @@ const styles = {
     borderRadius: "6px",
     marginBottom: "10px"
   }
-
-
 };
