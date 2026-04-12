@@ -7,7 +7,7 @@ Tools and Platforms:
 4. Database: PostgreSQL
 5. IDE: Visual Studio Code
 System Workflow:
-The fake ports are activated. This project uses five different types of ports [21, 22, 23, 80, 33600]. The ports are activated via listener.js which is reffered to as a honeypot.
+The fake ports are activated. This project uses five different types of ports [21, 22, 23, 80, 3360]. The ports are activated via listener.js which is reffered to as a honeypot.
 The backend processes these attacks and store it in database (PostgreSQL). It also fetches data to the front end.
 Outputs:
 1. Total numbers of Attacks.
