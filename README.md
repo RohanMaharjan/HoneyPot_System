@@ -21,7 +21,12 @@ The backend processes these attacks and store it in database (PostgreSQL). It al
 # Output Images
 ![Alt text](images/home.png)
 <br />
-![Alt text](images/dash.png)
+<p align="center">Home Page<p />
 <br />
 ![Alt text](images/Honey.png)
-
+<br />
+![Alt text](images/dash.png)
+![Alt text](images/live.png)
+![Alt text](images/recent.png)
+![Alt text](images/line.png)
+![Alt text](images/pie.png)
