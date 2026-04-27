@@ -9,7 +9,7 @@ These attacker's information is displayed using tables, line graphs and pie char
 5. IDE: Visual Studio Code
 **System Workflow:** <br />
 The fake ports are activated. This project uses five different types of ports **[21, 22, 23, 80, 3360]**. The ports are activated via listener.js which is reffered to as a honeypot.<br />
-The backend processes these attacks and store it in database (PostgreSQL). It also fetches data to the front end.
+The backend processes these attacks and store it in database (PostgreSQL). It also fetches data to the front end.<br />
 **Outputs:** <br />
 1. Total numbers of Attacks.
 2. Filter by port.
@@ -18,5 +18,10 @@ The backend processes these attacks and store it in database (PostgreSQL). It al
 5. Line Graph and Pie Chart
 6. Recent Date and Time of attack
 7. Status of Database
-
+# Output Images
+![Alt text](images/home.png)
+<br />
+![Alt text](images/dash.png)
+<br />
+![Alt text](images/Honey.png)
 
