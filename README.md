@@ -21,15 +21,21 @@ The backend processes these attacks and store it in database (PostgreSQL). It al
 # Output Images
 ![Alt text](images/home.png)
 <p align="center">Home Page<p />
+  
 ![Alt text](images/Honey.png)
 <p align="center">Web Attack Monitoring Page<p />
+  
 ![Alt text](images/dash.png)
 <p align="center">Dashboard<p />
+  
 ![Alt text](images/live.png)
 <p align="center">Live Attack Section<p />
+  
 ![Alt text](images/recent.png)
 <p align="center">Recent Attack Section<p />
+  
 ![Alt text](images/line.png)
 <p align="center">Line Graph<p />
+  
 ![Alt text](images/pie.png)
 <p align="center">Pie Chart<p />
