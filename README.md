@@ -20,30 +20,16 @@ The backend processes these attacks and store it in database (PostgreSQL). It al
 7. Status of Database
 # Output Images
 ![Alt text](images/home.png)
-<br />
 <p align="center">Home Page<p />
-<br />
 ![Alt text](images/Honey.png)
-<br />
 <p align="center">Web Attack Monitoring Page<p />
-<br />
 ![Alt text](images/dash.png)
-<br />
 <p align="center">Dashboard<p />
-<br />
 ![Alt text](images/live.png)
-<br />
 <p align="center">Live Attack Section<p />
-<br />
 ![Alt text](images/recent.png)
-<br />
 <p align="center">Recent Attack Section<p />
-<br />
 ![Alt text](images/line.png)
-<br />
 <p align="center">Line Graph<p />
-<br />
 ![Alt text](images/pie.png)
-<br />
 <p align="center">Pie Chart<p />
-<br />
